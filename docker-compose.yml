@@ -2,6 +2,9 @@ services:
   app:
     image: ${DOCKERHUB_USERNAME}/bookchigi-bakchigi:latest
     container_name: book-app
+    #  rds 도메인에 매핑되는 IP주소를 도커 네트워크 내부 컨테이너 중 하나가 질의하면 VPC의 DNS 서버로 질의를 넘김
+    dns:
+      - 172.31.0.2
     ports:
       - "8080:8080"
     env_file:
