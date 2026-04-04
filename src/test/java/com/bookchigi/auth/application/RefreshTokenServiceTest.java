@@ -1,2 +1,4 @@
-package com.bookchigi.auth.application;public class RefreshTokenServiceTest {
+package com.bookchigi.auth.application;
+
+public class RefreshTokenServiceTest {
 }
