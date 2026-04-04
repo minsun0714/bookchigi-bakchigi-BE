@@ -1,3 +1,8 @@
+app:
+  auth:
+    secure: true
+    same-site: Strict
+
 spring:
   application:
     name: bookchigi-bakchigi
@@ -5,20 +10,12 @@ spring:
   jackson:
     time-zone: UTC
 
-  datasource:
-    url: jdbc:h2:mem:bookchigi;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
   jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+    open-in-view: false
     properties:
       hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
+        jdbc:
+          time_zone: UTC
 
   security:
     oauth2:
@@ -49,22 +46,10 @@ management:
       enabled: true
   metrics:
     tags:
-      application: bookchigi-bakchigi
+      application: rsp-battle
 
 server:
-  port: 8080
   shutdown: graceful
-
-app:
-  auth:
-    access-token-expire-millis: 1800000
-    refresh-token-expire-millis: 604800000
-  cookie:
-    secure: false
-    same-site: Lax
 
 jwt:
   secret: ${JWT_SECRET}
-
-frontend:
-  url: ${FRONTEND_URL}
