@@ -60,7 +60,7 @@ public class User {
      * insert/update 불가
      */
     @Column(name = "active_flag", insertable = false, updatable = false)
-    private Integer activeFlag;
+    private Byte activeFlag;
 
     /* =========================
        생성 메서드
