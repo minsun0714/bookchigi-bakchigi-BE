@@ -11,6 +11,7 @@ import com.bookchigi.study.domain.StudyRole;
 import com.bookchigi.study.infrastructure.StudyMemberRepository;
 import com.bookchigi.study.infrastructure.StudyRepository;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
+import com.bookchigi.study.presentation.dto.MyStudyResponse;
 import com.bookchigi.study.presentation.dto.StudyDetailResponse;
 import com.bookchigi.study.presentation.dto.StudyResponse;
 import com.bookchigi.study.presentation.dto.StudyUpdateRequest;
@@ -129,6 +130,17 @@ public class StudyService {
 
         StudyMember member = StudyMember.createMember(study, user);
         studyMemberRepository.save(member);
+    }
+
+    public PageResponse<MyStudyResponse> getMyStudies(Long userId, StudyRole role, int page, int size) {
+        Page<StudyMember> memberPage = studyMemberRepository
+                .findByUserIdAndRoleOrderByJoinedAtDesc(userId, role, PageRequest.of(page, size));
+
+        List<MyStudyResponse> content = memberPage.getContent().stream()
+                .map(MyStudyResponse::from)
+                .toList();
+
+        return new PageResponse<>(content, page, size, memberPage.getTotalElements(), memberPage.getTotalPages());
     }
 
     public PageResponse<StudyResponse> getStudiesByIsbn(String isbn, int page, int size) {

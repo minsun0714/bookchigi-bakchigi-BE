@@ -3,6 +3,8 @@ package com.bookchigi.study.presentation;
 import com.bookchigi.auth.domain.CustomUserPrincipal;
 import com.bookchigi.book.presentation.dto.PageResponse;
 import com.bookchigi.study.application.StudyService;
+import com.bookchigi.study.domain.StudyRole;
+import com.bookchigi.study.presentation.dto.MyStudyResponse;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
 import com.bookchigi.study.presentation.dto.StudyDetailResponse;
 import com.bookchigi.study.presentation.dto.StudyResponse;
@@ -48,6 +50,17 @@ public class StudyController {
     ) {
         studyService.join(studyId, principal.getUserId());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users/me/studies")
+    public ResponseEntity<PageResponse<MyStudyResponse>> getMyStudies(
+            @RequestParam StudyRole role,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        PageResponse<MyStudyResponse> response = studyService.getMyStudies(principal.getUserId(), role, page, size);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/books/{isbn}/studies")

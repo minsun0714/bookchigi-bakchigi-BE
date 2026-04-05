@@ -9,10 +9,12 @@ import com.bookchigi.study.domain.StudyMember;
 import com.bookchigi.study.domain.StudyRole;
 import com.bookchigi.study.infrastructure.StudyMemberRepository;
 import com.bookchigi.study.infrastructure.StudyRepository;
+import com.bookchigi.study.presentation.dto.MyStudyResponse;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
 import com.bookchigi.study.presentation.dto.StudyDetailResponse;
 import com.bookchigi.study.presentation.dto.StudyResponse;
 import com.bookchigi.study.presentation.dto.StudyUpdateRequest;
+import com.bookchigi.book.presentation.dto.PageResponse;
 import com.bookchigi.user.domain.User;
 import com.bookchigi.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +23,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -300,5 +305,72 @@ class StudyServiceTest {
         studyService.join(1L, 1L);
 
         verify(studyMemberRepository).save(any(StudyMember.class));
+    }
+
+    // ===== getMyStudies =====
+
+    @Test
+    @DisplayName("내가 만든 스터디 목록을 조회할 수 있다")
+    void getMyStudiesAsLeader() {
+        Long userId = 1L;
+        User user = User.builder()
+                .id(userId)
+                .email("test@gmail.com")
+                .name("테스터")
+                .oauthProvider("GOOGLE")
+                .build();
+
+        Study study = Study.create("내 스터디", "설명", 10, null, null, true, createBook());
+        StudyMember leaderMember = StudyMember.createLeader(study, user);
+
+        PageImpl<StudyMember> page = new PageImpl<>(List.of(leaderMember), PageRequest.of(0, 10), 1);
+        given(studyMemberRepository.findByUserIdAndRoleOrderByJoinedAtDesc(userId, StudyRole.LEADER, PageRequest.of(0, 10)))
+                .willReturn(page);
+
+        PageResponse<MyStudyResponse> response = studyService.getMyStudies(userId, StudyRole.LEADER, 0, 10);
+
+        assertThat(response.content()).hasSize(1);
+        assertThat(response.content().get(0).name()).isEqualTo("내 스터디");
+        assertThat(response.content().get(0).myRole()).isEqualTo(StudyRole.LEADER);
+    }
+
+    @Test
+    @DisplayName("내가 참여중인 스터디 목록을 조회할 수 있다")
+    void getMyStudiesAsMember() {
+        Long userId = 1L;
+        User user = User.builder()
+                .id(userId)
+                .email("test@gmail.com")
+                .name("테스터")
+                .oauthProvider("GOOGLE")
+                .build();
+
+        Study study = Study.create("참여 스터디", "설명", 10, null, null, true, createBook());
+        StudyMember member = StudyMember.createMember(study, user);
+
+        PageImpl<StudyMember> page = new PageImpl<>(List.of(member), PageRequest.of(0, 10), 1);
+        given(studyMemberRepository.findByUserIdAndRoleOrderByJoinedAtDesc(userId, StudyRole.MEMBER, PageRequest.of(0, 10)))
+                .willReturn(page);
+
+        PageResponse<MyStudyResponse> response = studyService.getMyStudies(userId, StudyRole.MEMBER, 0, 10);
+
+        assertThat(response.content()).hasSize(1);
+        assertThat(response.content().get(0).name()).isEqualTo("참여 스터디");
+        assertThat(response.content().get(0).myRole()).isEqualTo(StudyRole.MEMBER);
+    }
+
+    @Test
+    @DisplayName("스터디가 없으면 빈 목록을 반환한다")
+    void getMyStudiesEmpty() {
+        Long userId = 1L;
+
+        PageImpl<StudyMember> page = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
+        given(studyMemberRepository.findByUserIdAndRoleOrderByJoinedAtDesc(userId, StudyRole.LEADER, PageRequest.of(0, 10)))
+                .willReturn(page);
+
+        PageResponse<MyStudyResponse> response = studyService.getMyStudies(userId, StudyRole.LEADER, 0, 10);
+
+        assertThat(response.content()).isEmpty();
+        assertThat(response.totalElements()).isZero();
     }
 }
