@@ -19,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -59,13 +59,13 @@ class StudyControllerTest {
 
         StudyCreateRequest request = new StudyCreateRequest(
                 "자바 스터디", "자바를 공부합니다", 10,
-                LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 30),
+                LocalDateTime.of(2026, 4, 10, 9, 0), LocalDateTime.of(2026, 4, 30, 18, 0),
                 true
         );
 
         StudyResponse response = new StudyResponse(
                 1L, "자바 스터디", "자바를 공부합니다", 10,
-                LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 30),
+                LocalDateTime.of(2026, 4, 10, 9, 0), LocalDateTime.of(2026, 4, 30, 18, 0),
                 true, "테스터#1", Instant.now()
         );
 
@@ -88,7 +88,7 @@ class StudyControllerTest {
 
         StudyCreateRequest request = new StudyCreateRequest(
                 "자바 스터디", "자바를 공부합니다", 10,
-                LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 30),
+                LocalDateTime.of(2026, 4, 10, 9, 0), LocalDateTime.of(2026, 4, 30, 18, 0),
                 true
         );
 
@@ -105,7 +105,7 @@ class StudyControllerTest {
 
         StudyResponse studyResponse = new StudyResponse(
                 1L, "자바 스터디", "자바를 공부합니다", 10,
-                LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 30),
+                LocalDateTime.of(2026, 4, 10, 9, 0), LocalDateTime.of(2026, 4, 30, 18, 0),
                 true, "테스터#1", Instant.now()
         );
         PageResponse<StudyResponse> pageResponse = new PageResponse<>(

@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "studies")
@@ -29,11 +29,11 @@ public class Study {
     @Column(name = "max_members", nullable = false)
     private int maxMembers;
 
-    @Column(name = "enrollment_start", nullable = false)
-    private LocalDate enrollmentStart;
+    @Column(name = "enrollment_start")
+    private LocalDateTime enrollmentStart;
 
-    @Column(name = "enrollment_end", nullable = false)
-    private LocalDate enrollmentEnd;
+    @Column(name = "enrollment_end")
+    private LocalDateTime enrollmentEnd;
 
     @Column(name = "is_public", nullable = false)
     @Builder.Default
@@ -58,8 +58,8 @@ public class Study {
     public static Study create(String name,
                                 String description,
                                 int maxMembers,
-                                LocalDate enrollmentStart,
-                                LocalDate enrollmentEnd,
+                                LocalDateTime enrollmentStart,
+                                LocalDateTime enrollmentEnd,
                                 boolean isPublic,
                                 Book book,
                                 User creator) {

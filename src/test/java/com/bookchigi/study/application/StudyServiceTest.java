@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +56,7 @@ class StudyServiceTest {
 
         StudyCreateRequest request = new StudyCreateRequest(
                 "자바 스터디", "자바를 공부합니다", 10,
-                LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 30),
+                LocalDateTime.of(2026, 4, 10, 9, 0), LocalDateTime.of(2026, 4, 30, 18, 0),
                 true
         );
 
@@ -83,7 +83,7 @@ class StudyServiceTest {
 
         StudyCreateRequest request = new StudyCreateRequest(
                 "자바 스터디", "자바를 공부합니다", 10,
-                LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 30),
+                LocalDateTime.of(2026, 4, 10, 9, 0), LocalDateTime.of(2026, 4, 30, 18, 0),
                 true
         );
 

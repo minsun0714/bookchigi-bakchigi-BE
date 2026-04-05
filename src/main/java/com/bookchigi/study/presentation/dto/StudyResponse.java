@@ -3,15 +3,15 @@ package com.bookchigi.study.presentation.dto;
 import com.bookchigi.study.domain.Study;
 
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record StudyResponse(
         Long id,
         String name,
         String description,
         int maxMembers,
-        LocalDate enrollmentStart,
-        LocalDate enrollmentEnd,
+        LocalDateTime enrollmentStart,
+        LocalDateTime enrollmentEnd,
         boolean isPublic,
         String creatorNickname,
         Instant createdAt
