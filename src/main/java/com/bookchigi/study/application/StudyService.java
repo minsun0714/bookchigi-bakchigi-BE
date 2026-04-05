@@ -51,7 +51,7 @@ public class StudyService {
     }
 
     public PageResponse<StudyResponse> getStudiesByIsbn(String isbn, int page, int size) {
-        Page<Study> studyPage = studyRepository.findByBookIsbn(isbn, PageRequest.of(page, size));
+        Page<Study> studyPage = studyRepository.findByBookIsbnOrderByCreatedAtDesc(isbn, PageRequest.of(page, size));
 
         List<StudyResponse> content = studyPage.getContent().stream()
                 .map(StudyResponse::from)
