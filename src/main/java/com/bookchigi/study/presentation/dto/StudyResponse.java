@@ -1,4 +1,4 @@
-package com.bookchigi.study.dto;
+package com.bookchigi.study.presentation.dto;
 
 import com.bookchigi.study.domain.Study;
 

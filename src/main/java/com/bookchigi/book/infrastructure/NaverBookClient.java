@@ -1,6 +1,6 @@
 package com.bookchigi.book.infrastructure;
 
-import com.bookchigi.book.dto.NaverBookResponse;
+import com.bookchigi.book.presentation.dto.NaverBookResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;

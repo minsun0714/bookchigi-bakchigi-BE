@@ -1,11 +1,11 @@
 package com.bookchigi.book.application;
 
 import com.bookchigi.book.domain.Book;
-import com.bookchigi.book.dto.BookResponse;
-import com.bookchigi.book.dto.NaverBookResponse;
-import com.bookchigi.book.dto.PageResponse;
+import com.bookchigi.book.infrastructure.BookRepository;
 import com.bookchigi.book.infrastructure.NaverBookClient;
-import com.bookchigi.book.persistence.BookRepository;
+import com.bookchigi.book.presentation.dto.BookResponse;
+import com.bookchigi.book.presentation.dto.NaverBookResponse;
+import com.bookchigi.book.presentation.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

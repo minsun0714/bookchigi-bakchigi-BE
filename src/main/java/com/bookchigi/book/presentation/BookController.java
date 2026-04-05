@@ -1,11 +1,14 @@
 package com.bookchigi.book.presentation;
 
 import com.bookchigi.book.application.BookService;
-import com.bookchigi.book.dto.BookResponse;
-import com.bookchigi.book.dto.PageResponse;
+import com.bookchigi.book.presentation.dto.BookResponse;
+import com.bookchigi.book.presentation.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/books")

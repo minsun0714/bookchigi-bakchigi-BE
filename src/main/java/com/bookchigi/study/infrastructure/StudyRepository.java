@@ -1,4 +1,4 @@
-package com.bookchigi.study.persistence;
+package com.bookchigi.study.infrastructure;
 
 import com.bookchigi.study.domain.Study;
 import org.springframework.data.domain.Page;

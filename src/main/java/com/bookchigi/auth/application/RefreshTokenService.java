@@ -5,7 +5,7 @@ import com.bookchigi.auth.domain.RefreshToken;
 import com.bookchigi.auth.domain.TokenPolicy;
 import com.bookchigi.auth.infrastructure.JwtProvider;
 import com.bookchigi.auth.infrastructure.RefreshTokenRepository;
-import com.bookchigi.user.persistence.UserRepository;
+import com.bookchigi.user.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

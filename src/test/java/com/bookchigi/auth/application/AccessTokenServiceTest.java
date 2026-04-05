@@ -4,7 +4,7 @@ import com.bookchigi.auth.domain.AccessToken;
 import com.bookchigi.auth.domain.TokenPolicy;
 import com.bookchigi.auth.infrastructure.AuthorizationCodeRepository;
 import com.bookchigi.auth.infrastructure.JwtProvider;
-import com.bookchigi.user.persistence.UserRepository;
+import com.bookchigi.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

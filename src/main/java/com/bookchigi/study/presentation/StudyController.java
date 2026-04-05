@@ -1,10 +1,10 @@
 package com.bookchigi.study.presentation;
 
 import com.bookchigi.auth.domain.CustomUserPrincipal;
-import com.bookchigi.book.dto.PageResponse;
+import com.bookchigi.book.presentation.dto.PageResponse;
 import com.bookchigi.study.application.StudyService;
-import com.bookchigi.study.dto.StudyCreateRequest;
-import com.bookchigi.study.dto.StudyResponse;
+import com.bookchigi.study.presentation.dto.StudyCreateRequest;
+import com.bookchigi.study.presentation.dto.StudyResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.bookchigi.book.dto;
+package com.bookchigi.book.presentation.dto;
 
 import java.util.List;
 

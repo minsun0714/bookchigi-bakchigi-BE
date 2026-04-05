@@ -1,4 +1,4 @@
-package com.bookchigi.study.dto;
+package com.bookchigi.study.presentation.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

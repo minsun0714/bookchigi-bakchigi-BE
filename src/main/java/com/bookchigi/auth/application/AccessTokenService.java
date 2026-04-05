@@ -4,7 +4,7 @@ import com.bookchigi.auth.domain.AccessToken;
 import com.bookchigi.auth.domain.TokenPolicy;
 import com.bookchigi.auth.infrastructure.AuthorizationCodeRepository;
 import com.bookchigi.auth.infrastructure.JwtProvider;
-import com.bookchigi.user.persistence.UserRepository;
+import com.bookchigi.user.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
