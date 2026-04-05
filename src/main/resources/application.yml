@@ -68,3 +68,8 @@ jwt:
 
 frontend:
   url: ${FRONTEND_URL}
+
+naver:
+  api:
+    client-id: ${NAVER_CLIENT_ID}
+    client-secret: ${NAVER_CLIENT_SECRET}
