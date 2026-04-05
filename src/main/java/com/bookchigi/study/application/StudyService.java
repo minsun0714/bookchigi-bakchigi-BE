@@ -30,15 +30,7 @@ public class StudyService {
 
     @Transactional
     public StudyResponse create(String isbn, StudyCreateRequest request, Long userId) {
-        Book book = bookService.upsert(
-                isbn,
-                request.bookTitle(),
-                request.bookAuthor(),
-                request.bookPublisher(),
-                request.bookImage(),
-                request.bookDescription(),
-                request.bookPubDate()
-        );
+        Book book = bookService.getOrCreateByIsbn(isbn);
 
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));

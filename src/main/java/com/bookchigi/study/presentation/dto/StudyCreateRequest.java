@@ -12,11 +12,5 @@ public record StudyCreateRequest(
         @Min(2) int maxMembers,
         @NotNull LocalDate enrollmentStart,
         @NotNull LocalDate enrollmentEnd,
-        boolean isPublic,
-        @NotBlank String bookTitle,
-        @NotBlank String bookAuthor,
-        String bookPublisher,
-        String bookImage,
-        String bookDescription,
-        String bookPubDate
+        boolean isPublic
 ) {}
