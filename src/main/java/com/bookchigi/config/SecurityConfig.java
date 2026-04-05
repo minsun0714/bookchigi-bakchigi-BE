@@ -51,7 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/users/me").authenticated()
                         .requestMatchers("/login/**", "/auth/refresh", "/auth/logout", "/auth/exchange").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/books", "/books/*/studies").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/books/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

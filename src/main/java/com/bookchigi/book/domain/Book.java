@@ -22,10 +22,10 @@ public class Book {
     @Column(nullable = false, length = 20, unique = true)
     private String isbn;
 
-    @Column(nullable = false, length = 200)
+    @Column(length = 200)
     private String title;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     private String author;
 
     @Column(length = 100)
@@ -46,5 +46,25 @@ public class Book {
     @PrePersist
     protected void onCreate() {
         this.createdAt = Instant.now();
+    }
+
+    public static Book createWithIsbnOnly(String isbn) {
+        return Book.builder()
+                .isbn(isbn)
+                .build();
+    }
+
+    public boolean hasDetail() {
+        return title != null;
+    }
+
+    public void fillDetail(String title, String author, String publisher,
+                           String image, String description, String pubDate) {
+        this.title = title;
+        this.author = author;
+        this.publisher = publisher;
+        this.image = image;
+        this.description = description;
+        this.pubDate = pubDate;
     }
 }

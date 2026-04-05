@@ -34,4 +34,14 @@ public class NaverBookClient {
                 .retrieve()
                 .body(NaverBookResponse.class);
     }
+
+    public NaverBookResponse searchByIsbn(String isbn) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/book_adv.json")
+                        .queryParam("d_isbn", isbn)
+                        .build())
+                .retrieve()
+                .body(NaverBookResponse.class);
+    }
 }

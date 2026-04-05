@@ -5,10 +5,7 @@ import com.bookchigi.book.presentation.dto.BookResponse;
 import com.bookchigi.book.presentation.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/books")
@@ -24,5 +21,11 @@ public class BookController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(bookService.getBooks(query, page, size));
+    }
+
+    @GetMapping("/{isbn}")
+    public ResponseEntity<BookResponse> getBook(@PathVariable String isbn) {
+        BookResponse response = bookService.getBookByIsbn(isbn);
+        return ResponseEntity.ok(response);
     }
 }

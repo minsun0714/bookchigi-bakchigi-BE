@@ -6,6 +6,8 @@ import com.bookchigi.book.infrastructure.NaverBookClient;
 import com.bookchigi.book.presentation.dto.BookResponse;
 import com.bookchigi.book.presentation.dto.NaverBookResponse;
 import com.bookchigi.book.presentation.dto.PageResponse;
+import com.bookchigi.common.exception.BusinessException;
+import com.bookchigi.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,18 +54,28 @@ public class BookService {
     }
 
     @Transactional
-    public Book upsert(String isbn, String title, String author, String publisher, String image, String description, String pubDate) {
+    public BookResponse getBookByIsbn(String isbn) {
+        Book book = bookRepository.findByIsbn(isbn)
+                .orElseGet(() -> bookRepository.save(Book.createWithIsbnOnly(isbn)));
+
+        if (!book.hasDetail()) {
+            NaverBookResponse response = naverBookClient.searchByIsbn(isbn);
+            NaverBookResponse.Item item = response.items().stream()
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException(ErrorCode.BOOK_NOT_FOUND));
+
+            book.fillDetail(
+                    item.title(), item.author(), item.publisher(),
+                    item.image(), item.description(), item.pubdate()
+            );
+        }
+
+        return BookResponse.from(book);
+    }
+
+    @Transactional
+    public Book getOrCreateByIsbn(String isbn) {
         return bookRepository.findByIsbn(isbn)
-                .orElseGet(() -> bookRepository.save(
-                        Book.builder()
-                                .isbn(isbn)
-                                .title(title)
-                                .author(author)
-                                .publisher(publisher)
-                                .image(image)
-                                .description(description)
-                                .pubDate(pubDate)
-                                .build()
-                ));
+                .orElseGet(() -> bookRepository.save(Book.createWithIsbnOnly(isbn)));
     }
 }
