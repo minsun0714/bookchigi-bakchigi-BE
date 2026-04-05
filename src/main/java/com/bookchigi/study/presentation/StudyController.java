@@ -4,6 +4,7 @@ import com.bookchigi.auth.domain.CustomUserPrincipal;
 import com.bookchigi.book.presentation.dto.PageResponse;
 import com.bookchigi.study.application.StudyService;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
+import com.bookchigi.study.presentation.dto.StudyDetailResponse;
 import com.bookchigi.study.presentation.dto.StudyResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +15,22 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/books/{isbn}/studies")
 @RequiredArgsConstructor
 public class StudyController {
 
     private final StudyService studyService;
 
-    @PostMapping
+    @GetMapping("/studies/{studyId}")
+    public ResponseEntity<StudyDetailResponse> getStudy(
+            @PathVariable Long studyId,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        Long userId = principal != null ? principal.getUserId() : null;
+        StudyDetailResponse response = studyService.getStudy(studyId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/books/{isbn}/studies")
     public ResponseEntity<StudyResponse> create(
             @PathVariable String isbn,
             @Valid @RequestBody StudyCreateRequest request,
@@ -31,7 +41,7 @@ public class StudyController {
                 .body(response);
     }
 
-    @GetMapping
+    @GetMapping("/books/{isbn}/studies")
     public ResponseEntity<PageResponse<StudyResponse>> getStudies(
             @PathVariable String isbn,
             @RequestParam(defaultValue = "0") int page,
