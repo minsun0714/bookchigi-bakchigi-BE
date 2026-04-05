@@ -12,6 +12,7 @@ import com.bookchigi.study.domain.StudyRole;
 import com.bookchigi.study.infrastructure.StudyMemberRepository;
 import com.bookchigi.study.infrastructure.StudyRepository;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
+import com.bookchigi.study.presentation.dto.StudyMemberResponse;
 import com.bookchigi.study.presentation.dto.MyStudyResponse;
 import com.bookchigi.study.presentation.dto.StudyDetailResponse;
 import com.bookchigi.study.presentation.dto.StudyResponse;
@@ -84,13 +85,7 @@ public class StudyService {
         Study study = studyRepository.findById(studyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
-        boolean isLeader = studyMemberRepository.findByStudyIdAndRole(studyId, StudyRole.LEADER)
-                .map(member -> member.getUser().getId().equals(userId))
-                .orElse(false);
-
-        if (!isLeader) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
-        }
+        verifyLeader(studyId, userId);
 
         study.update(
                 request.name(),
@@ -127,8 +122,72 @@ public class StudyService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        StudyMember member = StudyMember.createMember(study, user);
-        studyMemberRepository.save(member);
+        StudyMember pending = StudyMember.createPending(study, user);
+        studyMemberRepository.save(pending);
+    }
+
+    @Transactional
+    public void approve(Long studyId, Long targetUserId, Long currentUserId) {
+        Study study = studyRepository.findByIdForUpdate(studyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
+
+        verifyLeader(studyId, currentUserId);
+
+        long activeCount = studyMemberRepository.countByStudyIdAndRoleNot(studyId, StudyRole.PENDING);
+        if (activeCount >= study.getMaxMembers()) {
+            throw new BusinessException(ErrorCode.STUDY_FULL);
+        }
+
+        StudyMember member = studyMemberRepository.findByStudyIdAndUserId(studyId, targetUserId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        member.approve();
+    }
+
+    @Transactional
+    public void reject(Long studyId, Long targetUserId, Long currentUserId) {
+        verifyLeader(studyId, currentUserId);
+
+        StudyMember member = studyMemberRepository.findByStudyIdAndUserId(studyId, targetUserId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
+
+        if (!member.isPending()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT);
+        }
+
+        studyMemberRepository.delete(member);
+    }
+
+    @Transactional
+    public void delete(Long studyId, Long currentUserId) {
+        studyRepository.findById(studyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
+
+        verifyLeader(studyId, currentUserId);
+
+        studyMemberRepository.deleteAllByStudyId(studyId);
+        studyRepository.deleteById(studyId);
+    }
+
+    public List<StudyMemberResponse> getPendingMembers(Long studyId, Long currentUserId) {
+        verifyLeader(studyId, currentUserId);
+
+        List<StudyMember> pendingMembers = studyMemberRepository
+                .findByStudyIdAndRole(studyId, StudyRole.PENDING, org.springframework.data.domain.Sort.by("joinedAt").ascending());
+
+        return pendingMembers.stream()
+                .map(StudyMemberResponse::from)
+                .toList();
+    }
+
+    private void verifyLeader(Long studyId, Long userId) {
+        boolean isLeader = studyMemberRepository.findByStudyIdAndRole(studyId, StudyRole.LEADER)
+                .map(member -> member.getUser().getId().equals(userId))
+                .orElse(false);
+
+        if (!isLeader) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
     }
 
     public PageResponse<MyStudyResponse> getMyStudies(Long userId, StudyRole role, int page, int size) {

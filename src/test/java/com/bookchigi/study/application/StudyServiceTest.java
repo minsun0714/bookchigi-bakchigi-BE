@@ -373,4 +373,130 @@ class StudyServiceTest {
         assertThat(response.content()).isEmpty();
         assertThat(response.totalElements()).isZero();
     }
+
+    // ===== approve =====
+
+    @Test
+    @DisplayName("리더가 PENDING 멤버를 승인할 수 있다")
+    void approve() {
+        Long leaderId = 1L;
+        Long targetUserId = 2L;
+
+        User leader = User.builder().id(leaderId).email("leader@gmail.com").name("리더").oauthProvider("GOOGLE").build();
+        User target = User.builder().id(targetUserId).email("target@gmail.com").name("신청자").oauthProvider("GOOGLE").build();
+
+        Book book = createBook();
+        Study study = Study.create("스터디", "설명", 10, null, null, true, book);
+        StudyMember leaderMember = StudyMember.createLeader(study, leader);
+        StudyMember pendingMember = StudyMember.createPending(study, target);
+
+        given(studyRepository.findByIdForUpdate(1L)).willReturn(Optional.of(study));
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.of(leaderMember));
+        given(studyMemberRepository.countByStudyIdAndRoleNot(1L, StudyRole.PENDING)).willReturn(1L);
+        given(studyMemberRepository.findByStudyIdAndUserId(1L, targetUserId)).willReturn(Optional.of(pendingMember));
+
+        studyService.approve(1L, targetUserId, leaderId);
+
+        assertThat(pendingMember.getRole()).isEqualTo(StudyRole.MEMBER);
+    }
+
+    @Test
+    @DisplayName("정원이 가득 찬 상태에서 승인하면 예외가 발생한다")
+    void approveWhenFull() {
+        Long leaderId = 1L;
+        Long targetUserId = 2L;
+
+        User leader = User.builder().id(leaderId).email("leader@gmail.com").name("리더").oauthProvider("GOOGLE").build();
+        Study study = Study.create("스터디", "설명", 2, null, null, true, createBook());
+        StudyMember leaderMember = StudyMember.createLeader(study, leader);
+
+        given(studyRepository.findByIdForUpdate(1L)).willReturn(Optional.of(study));
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.of(leaderMember));
+        given(studyMemberRepository.countByStudyIdAndRoleNot(1L, StudyRole.PENDING)).willReturn(2L);
+
+        assertThatThrownBy(() -> studyService.approve(1L, targetUserId, leaderId))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(ErrorCode.STUDY_FULL.getMessage());
+    }
+
+    @Test
+    @DisplayName("리더가 아니면 승인할 수 없다")
+    void approveWithoutLeaderRole() {
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+
+        given(studyRepository.findByIdForUpdate(1L)).willReturn(Optional.of(study));
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> studyService.approve(1L, 2L, 999L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(ErrorCode.FORBIDDEN.getMessage());
+    }
+
+    // ===== reject =====
+
+    @Test
+    @DisplayName("리더가 PENDING 멤버를 거절하면 삭제된다")
+    void reject() {
+        Long leaderId = 1L;
+        Long targetUserId = 2L;
+
+        User leader = User.builder().id(leaderId).email("leader@gmail.com").name("리더").oauthProvider("GOOGLE").build();
+        User target = User.builder().id(targetUserId).email("target@gmail.com").name("신청자").oauthProvider("GOOGLE").build();
+
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+        StudyMember leaderMember = StudyMember.createLeader(study, leader);
+        StudyMember pendingMember = StudyMember.createPending(study, target);
+
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.of(leaderMember));
+        given(studyMemberRepository.findByStudyIdAndUserId(1L, targetUserId)).willReturn(Optional.of(pendingMember));
+
+        studyService.reject(1L, targetUserId, leaderId);
+
+        verify(studyMemberRepository).delete(pendingMember);
+    }
+
+    @Test
+    @DisplayName("리더가 아니면 거절할 수 없다")
+    void rejectWithoutLeaderRole() {
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> studyService.reject(1L, 2L, 999L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(ErrorCode.FORBIDDEN.getMessage());
+    }
+
+    // ===== delete =====
+
+    @Test
+    @DisplayName("리더가 스터디를 삭제할 수 있다")
+    void delete() {
+        Long leaderId = 1L;
+        User leader = User.builder().id(leaderId).email("leader@gmail.com").name("리더").oauthProvider("GOOGLE").build();
+
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+        StudyMember leaderMember = StudyMember.createLeader(study, leader);
+
+        given(studyRepository.findById(1L)).willReturn(Optional.of(study));
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.of(leaderMember));
+
+        studyService.delete(1L, leaderId);
+
+        verify(studyMemberRepository).deleteAllByStudyId(1L);
+        verify(studyRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("리더가 아니면 스터디를 삭제할 수 없다")
+    void deleteWithoutLeaderRole() {
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+
+        given(studyRepository.findById(1L)).willReturn(Optional.of(study));
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> studyService.delete(1L, 999L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(ErrorCode.FORBIDDEN.getMessage());
+
+        verify(studyRepository, never()).deleteById(any());
+    }
 }
