@@ -87,37 +87,53 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("ISBN으로 책이 존재하면 기존 책을 반환한다")
-    void upsertExistingBook() {
-        Book existingBook = Book.builder()
+    @DisplayName("ISBN으로 책이 존재하고 상세정보가 있으면 DB에서 반환한다")
+    void getBookByIsbnWithDetail() {
+        Book book = Book.builder()
                 .isbn("9791173576577")
                 .title("기존 책")
                 .author("기존 저자")
                 .build();
 
-        given(bookRepository.findByIsbn("9791173576577")).willReturn(Optional.of(existingBook));
+        given(bookRepository.findByIsbn("9791173576577")).willReturn(Optional.of(book));
 
-        Book result = bookService.upsert(
-                "9791173576577", "새 제목", "새 저자",
-                "출판사", "이미지", "설명", "20260101"
-        );
+        BookResponse result = bookService.getBookByIsbn("9791173576577");
 
-        assertThat(result.getTitle()).isEqualTo("기존 책");
-        verify(bookRepository, never()).save(any());
+        assertThat(result.title()).isEqualTo("기존 책");
+        verify(naverBookClient, never()).searchByIsbn(any());
     }
 
     @Test
-    @DisplayName("ISBN으로 책이 없으면 새로 저장한다")
-    void upsertNewBook() {
+    @DisplayName("ISBN으로 책이 존재하지만 상세정보가 없으면 네이버 API로 채운다")
+    void getBookByIsbnWithoutDetail() {
+        Book book = Book.createWithIsbnOnly("9791173576577");
+
+        given(bookRepository.findByIsbn("9791173576577")).willReturn(Optional.of(book));
+
+        NaverBookResponse.Item item = new NaverBookResponse.Item(
+                "네이버 책", "https://link", "https://image",
+                "저자", "19800", "출판사", "20260101",
+                "9791173576577", "설명"
+        );
+        NaverBookResponse naverResponse = new NaverBookResponse(1, 1, 1, List.of(item));
+        given(naverBookClient.searchByIsbn("9791173576577")).willReturn(naverResponse);
+
+        BookResponse result = bookService.getBookByIsbn("9791173576577");
+
+        assertThat(result.title()).isEqualTo("네이버 책");
+        assertThat(book.hasDetail()).isTrue();
+    }
+
+    @Test
+    @DisplayName("getOrCreateByIsbn - 책이 없으면 ISBN만으로 생성한다")
+    void getOrCreateByIsbnNew() {
         given(bookRepository.findByIsbn("9791173576577")).willReturn(Optional.empty());
         given(bookRepository.save(any(Book.class))).willAnswer(invocation -> invocation.getArgument(0));
 
-        Book result = bookService.upsert(
-                "9791173576577", "새 책", "새 저자",
-                "출판사", "이미지", "설명", "20260101"
-        );
+        Book result = bookService.getOrCreateByIsbn("9791173576577");
 
-        assertThat(result.getTitle()).isEqualTo("새 책");
+        assertThat(result.getIsbn()).isEqualTo("9791173576577");
+        assertThat(result.hasDetail()).isFalse();
         verify(bookRepository).save(any(Book.class));
     }
 }

@@ -60,8 +60,7 @@ class StudyControllerTest {
         StudyCreateRequest request = new StudyCreateRequest(
                 "자바 스터디", "자바를 공부합니다", 10,
                 LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 30),
-                true,
-                "테스트 책", "테스트 저자", "출판사", "이미지", "설명", "20260101"
+                true
         );
 
         StudyResponse response = new StudyResponse(
@@ -90,8 +89,7 @@ class StudyControllerTest {
         StudyCreateRequest request = new StudyCreateRequest(
                 "자바 스터디", "자바를 공부합니다", 10,
                 LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 30),
-                true,
-                "테스트 책", "테스트 저자", "출판사", "이미지", "설명", "20260101"
+                true
         );
 
         mockMvc.perform(post("/books/{isbn}/studies", isbn)

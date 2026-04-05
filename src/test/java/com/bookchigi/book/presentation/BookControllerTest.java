@@ -76,4 +76,22 @@ class BookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("주식투자"));
     }
+
+    @Test
+    @DisplayName("GET /books/{isbn} - ISBN으로 책 상세를 조회한다")
+    void getBookByIsbn() throws Exception {
+        String isbn = "9791173576577";
+        BookResponse bookResponse = new BookResponse(
+                isbn, "테스트 책", "테스트 저자",
+                "출판사", "이미지", "설명", "20260101"
+        );
+
+        given(bookService.getBookByIsbn(isbn)).willReturn(bookResponse);
+
+        mockMvc.perform(get("/books/{isbn}", isbn))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isbn").value(isbn))
+                .andExpect(jsonPath("$.title").value("테스트 책"))
+                .andExpect(jsonPath("$.author").value("테스트 저자"));
+    }
 }
