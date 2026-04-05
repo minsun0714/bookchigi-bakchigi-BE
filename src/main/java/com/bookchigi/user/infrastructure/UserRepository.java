@@ -1,4 +1,4 @@
-package com.bookchigi.user.persistence;
+package com.bookchigi.user.infrastructure;
 
 import com.bookchigi.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
