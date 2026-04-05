@@ -20,8 +20,6 @@ class StudyTest {
                 .author("테스트 저자")
                 .build();
 
-        User creator = User.createFromOAuth("test@gmail.com", "테스터", "GOOGLE");
-
         LocalDateTime start = LocalDateTime.of(2026, 4, 10, 9, 0);
         LocalDateTime end = LocalDateTime.of(2026, 4, 30, 18, 0);
 
@@ -32,8 +30,7 @@ class StudyTest {
                 start,
                 end,
                 true,
-                book,
-                creator
+                book
         );
 
         assertThat(study.getName()).isEqualTo("자바 스터디");
@@ -43,7 +40,6 @@ class StudyTest {
         assertThat(study.getEnrollmentEnd()).isEqualTo(end);
         assertThat(study.isPublic()).isTrue();
         assertThat(study.getBook()).isEqualTo(book);
-        assertThat(study.getCreator()).isEqualTo(creator);
     }
 
     @Test
@@ -55,8 +51,6 @@ class StudyTest {
                 .author("테스트 저자")
                 .build();
 
-        User creator = User.createFromOAuth("test@gmail.com", "테스터", "GOOGLE");
-
         Study study = Study.create(
                 "비공개 스터디",
                 "비공개입니다",
@@ -64,10 +58,37 @@ class StudyTest {
                 LocalDateTime.of(2026, 4, 10, 9, 0),
                 LocalDateTime.of(2026, 4, 30, 18, 0),
                 false,
-                book,
-                creator
+                book
         );
 
         assertThat(study.isPublic()).isFalse();
+    }
+
+    @Test
+    @DisplayName("StudyMember.createLeader로 리더를 생성할 수 있다")
+    void createLeader() {
+        Book book = Book.builder().isbn("9791173576577").build();
+        User user = User.createFromOAuth("test@gmail.com", "테스터", "GOOGLE");
+
+        Study study = Study.create("스터디", null, 10, null, null, true, book);
+        StudyMember leader = StudyMember.createLeader(study, user);
+
+        assertThat(leader.getRole()).isEqualTo(StudyRole.LEADER);
+        assertThat(leader.isLeader()).isTrue();
+        assertThat(leader.getStudy()).isEqualTo(study);
+        assertThat(leader.getUser()).isEqualTo(user);
+    }
+
+    @Test
+    @DisplayName("StudyMember.createMember로 일반 멤버를 생성할 수 있다")
+    void createMember() {
+        Book book = Book.builder().isbn("9791173576577").build();
+        User user = User.createFromOAuth("test@gmail.com", "테스터", "GOOGLE");
+
+        Study study = Study.create("스터디", null, 10, null, null, true, book);
+        StudyMember member = StudyMember.createMember(study, user);
+
+        assertThat(member.getRole()).isEqualTo(StudyRole.MEMBER);
+        assertThat(member.isLeader()).isFalse();
     }
 }
