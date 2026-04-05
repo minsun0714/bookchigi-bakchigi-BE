@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -109,12 +110,12 @@ class StudyServiceTest {
                 Book.builder().isbn("9791173576577").title("책").author("저자").build());
 
         given(studyRepository.findById(1L)).willReturn(Optional.of(study));
-        given(studyMemberRepository.findByStudyIdAndRole(any(), any()))
-                .willReturn(Optional.empty());
+        given(studyMemberRepository.findByStudyId(1L)).willReturn(List.of());
 
         StudyDetailResponse response = studyService.getStudy(1L, null);
 
         assertThat(response.name()).isEqualTo("공개 스터디");
+        assertThat(response.members()).isEmpty();
     }
 
     @Test
@@ -152,11 +153,11 @@ class StudyServiceTest {
 
         given(studyRepository.findById(1L)).willReturn(Optional.of(study));
         given(studyMemberRepository.existsByStudyIdAndUserId(1L, 1L)).willReturn(true);
-        given(studyMemberRepository.findByStudyIdAndRole(any(), any()))
-                .willReturn(Optional.empty());
+        given(studyMemberRepository.findByStudyId(1L)).willReturn(List.of());
 
         StudyDetailResponse response = studyService.getStudy(1L, 1L);
 
         assertThat(response.name()).isEqualTo("비공개 스터디");
+        assertThat(response.members()).isEmpty();
     }
 }

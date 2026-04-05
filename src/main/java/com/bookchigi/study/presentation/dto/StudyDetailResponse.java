@@ -2,9 +2,11 @@ package com.bookchigi.study.presentation.dto;
 
 import com.bookchigi.book.presentation.dto.BookResponse;
 import com.bookchigi.study.domain.Study;
+import com.bookchigi.study.domain.StudyMember;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record StudyDetailResponse(
         Long id,
@@ -14,11 +16,15 @@ public record StudyDetailResponse(
         LocalDateTime enrollmentStart,
         LocalDateTime enrollmentEnd,
         boolean isPublic,
-        String leaderNickname,
         Instant createdAt,
-        BookResponse book
+        BookResponse book,
+        List<StudyMemberResponse> members
 ) {
-    public static StudyDetailResponse from(Study study, String leaderNickname) {
+    public static StudyDetailResponse from(Study study, List<StudyMember> members) {
+        List<StudyMemberResponse> memberResponses = members.stream()
+                .map(StudyMemberResponse::from)
+                .toList();
+
         return new StudyDetailResponse(
                 study.getId(),
                 study.getName(),
@@ -27,9 +33,9 @@ public record StudyDetailResponse(
                 study.getEnrollmentStart(),
                 study.getEnrollmentEnd(),
                 study.isPublic(),
-                leaderNickname,
                 study.getCreatedAt(),
-                BookResponse.from(study.getBook())
+                BookResponse.from(study.getBook()),
+                memberResponses
         );
     }
 }

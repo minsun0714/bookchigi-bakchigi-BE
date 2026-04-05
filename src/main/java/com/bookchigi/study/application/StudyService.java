@@ -7,6 +7,7 @@ import com.bookchigi.common.exception.BusinessException;
 import com.bookchigi.common.exception.ErrorCode;
 import com.bookchigi.study.domain.Study;
 import com.bookchigi.study.domain.StudyMember;
+import com.bookchigi.study.domain.StudyRole;
 import com.bookchigi.study.infrastructure.StudyMemberRepository;
 import com.bookchigi.study.infrastructure.StudyRepository;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
@@ -70,11 +71,9 @@ public class StudyService {
             }
         }
 
-        String leaderNickname = studyMemberRepository.findByStudyIdAndRole(studyId, com.bookchigi.study.domain.StudyRole.LEADER)
-                .map(member -> member.getUser().getNickname())
-                .orElse(null);
+        List<StudyMember> members = studyMemberRepository.findByStudyId(studyId);
 
-        return StudyDetailResponse.from(study, leaderNickname);
+        return StudyDetailResponse.from(study, members);
     }
 
     public PageResponse<StudyResponse> getStudiesByIsbn(String isbn, int page, int size) {
@@ -82,7 +81,7 @@ public class StudyService {
 
         List<StudyResponse> content = studyPage.getContent().stream()
                 .map(study -> {
-                    String leaderNickname = studyMemberRepository.findByStudyIdAndRole(study.getId(), com.bookchigi.study.domain.StudyRole.LEADER)
+                    String leaderNickname = studyMemberRepository.findByStudyIdAndRole(study.getId(), StudyRole.LEADER)
                             .map(member -> member.getUser().getNickname())
                             .orElse(null);
                     return StudyResponse.from(study, leaderNickname);
