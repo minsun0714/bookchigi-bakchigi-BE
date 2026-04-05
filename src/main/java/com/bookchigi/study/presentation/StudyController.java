@@ -6,6 +6,7 @@ import com.bookchigi.study.application.StudyService;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
 import com.bookchigi.study.presentation.dto.StudyDetailResponse;
 import com.bookchigi.study.presentation.dto.StudyResponse;
+import com.bookchigi.study.presentation.dto.StudyUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,16 @@ public class StudyController {
     ) {
         Long userId = principal != null ? principal.getUserId() : null;
         StudyDetailResponse response = studyService.getStudy(studyId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/studies/{studyId}")
+    public ResponseEntity<StudyDetailResponse> update(
+            @PathVariable Long studyId,
+            @Valid @RequestBody StudyUpdateRequest request,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        StudyDetailResponse response = studyService.update(studyId, request, principal.getUserId());
         return ResponseEntity.ok(response);
     }
 

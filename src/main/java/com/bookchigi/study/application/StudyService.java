@@ -13,6 +13,7 @@ import com.bookchigi.study.infrastructure.StudyRepository;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
 import com.bookchigi.study.presentation.dto.StudyDetailResponse;
 import com.bookchigi.study.presentation.dto.StudyResponse;
+import com.bookchigi.study.presentation.dto.StudyUpdateRequest;
 import com.bookchigi.user.domain.User;
 import com.bookchigi.user.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -73,7 +74,33 @@ public class StudyService {
 
         List<StudyMember> members = studyMemberRepository.findByStudyId(studyId);
 
-        return StudyDetailResponse.from(study, members);
+        return StudyDetailResponse.from(study, members, userId);
+    }
+
+    @Transactional
+    public StudyDetailResponse update(Long studyId, StudyUpdateRequest request, Long userId) {
+        Study study = studyRepository.findById(studyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
+
+        boolean isLeader = studyMemberRepository.findByStudyIdAndRole(studyId, StudyRole.LEADER)
+                .map(member -> member.getUser().getId().equals(userId))
+                .orElse(false);
+
+        if (!isLeader) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        study.update(
+                request.name(),
+                request.description(),
+                request.maxMembers(),
+                request.enrollmentStart(),
+                request.enrollmentEnd(),
+                request.isPublic()
+        );
+
+        List<StudyMember> members = studyMemberRepository.findByStudyId(studyId);
+        return StudyDetailResponse.from(study, members, userId);
     }
 
     public PageResponse<StudyResponse> getStudiesByIsbn(String isbn, int page, int size) {

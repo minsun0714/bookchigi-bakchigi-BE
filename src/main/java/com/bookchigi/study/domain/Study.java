@@ -67,4 +67,18 @@ public class Study {
                 .book(book)
                 .build();
     }
+
+    public void update(String name,
+                       String description,
+                       int maxMembers,
+                       LocalDateTime enrollmentStart,
+                       LocalDateTime enrollmentEnd,
+                       boolean isPublic) {
+        this.name = name;
+        this.description = description;
+        this.maxMembers = maxMembers;
+        this.enrollmentStart = enrollmentStart;
+        this.enrollmentEnd = enrollmentEnd;
+        this.isPublic = isPublic;
+    }
 }

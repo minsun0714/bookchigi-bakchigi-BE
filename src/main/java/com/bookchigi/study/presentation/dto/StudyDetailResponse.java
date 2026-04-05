@@ -16,14 +16,18 @@ public record StudyDetailResponse(
         LocalDateTime enrollmentStart,
         LocalDateTime enrollmentEnd,
         boolean isPublic,
+        boolean isCurrentUserLeader,
         Instant createdAt,
         BookResponse book,
         List<StudyMemberResponse> members
 ) {
-    public static StudyDetailResponse from(Study study, List<StudyMember> members) {
+    public static StudyDetailResponse from(Study study, List<StudyMember> members, Long currentUserId) {
         List<StudyMemberResponse> memberResponses = members.stream()
                 .map(StudyMemberResponse::from)
                 .toList();
+
+        boolean isLeader = members.stream()
+                .anyMatch(m -> m.isLeader() && m.getUser().getId().equals(currentUserId));
 
         return new StudyDetailResponse(
                 study.getId(),
@@ -33,6 +37,7 @@ public record StudyDetailResponse(
                 study.getEnrollmentStart(),
                 study.getEnrollmentEnd(),
                 study.isPublic(),
+                isLeader,
                 study.getCreatedAt(),
                 BookResponse.from(study.getBook()),
                 memberResponses
