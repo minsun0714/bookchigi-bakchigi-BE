@@ -78,4 +78,8 @@ public class StudyMember {
         }
         this.role = StudyRole.MEMBER;
     }
+
+    public void promoteToLeader() {
+        this.role = StudyRole.LEADER;
+    }
 }

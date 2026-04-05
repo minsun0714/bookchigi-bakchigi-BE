@@ -54,6 +54,16 @@ public class StudyController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/studies/{studyId}/leave")
+    public ResponseEntity<Void> leave(
+            @PathVariable Long studyId,
+            @RequestParam(required = false) Long nextLeaderId,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        studyService.leave(studyId, principal.getUserId(), nextLeaderId);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/studies/{studyId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long studyId,

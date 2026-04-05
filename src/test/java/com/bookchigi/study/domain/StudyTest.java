@@ -70,7 +70,7 @@ class StudyTest {
     @DisplayName("StudyMember.createLeader로 리더를 생성할 수 있다")
     void createLeader() {
         Book book = Book.builder().isbn("9791173576577").build();
-        User user = User.createFromOAuth("test@gmail.com", "테스터", "GOOGLE");
+        User user = User.createFromOAuth("test@gmail.com", "테스터", null, "GOOGLE");
 
         Study study = Study.create("스터디", null, 10, null, null, true, book);
         StudyMember leader = StudyMember.createLeader(study, user);
@@ -85,7 +85,7 @@ class StudyTest {
     @DisplayName("StudyMember.createMember로 일반 멤버를 생성할 수 있다")
     void createMember() {
         Book book = Book.builder().isbn("9791173576577").build();
-        User user = User.createFromOAuth("test@gmail.com", "테스터", "GOOGLE");
+        User user = User.createFromOAuth("test@gmail.com", "테스터", null, "GOOGLE");
 
         Study study = Study.create("스터디", null, 10, null, null, true, book);
         StudyMember member = StudyMember.createMember(study, user);

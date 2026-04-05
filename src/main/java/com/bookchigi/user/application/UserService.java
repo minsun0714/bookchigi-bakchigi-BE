@@ -1,7 +1,10 @@
 package com.bookchigi.user.application;
 
+import com.bookchigi.common.exception.BusinessException;
+import com.bookchigi.common.exception.ErrorCode;
 import com.bookchigi.user.domain.User;
 import com.bookchigi.user.infrastructure.UserRepository;
+import com.bookchigi.user.presentation.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -39,5 +42,18 @@ public class UserService {
                     savedUser.updateNickname(savedUser.getName() + "#" + savedUser.getId());
                     return savedUser;
                 });
+    }
+
+    @Transactional
+    public UserResponse updateNickname(Long userId, String nickname) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (userRepository.existsByNicknameAndDeletedAtIsNull(nickname)) {
+            throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
+        }
+
+        user.updateNickname(nickname);
+        return UserResponse.from(user);
     }
 }
