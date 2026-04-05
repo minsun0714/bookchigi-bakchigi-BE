@@ -3,9 +3,12 @@ package com.bookchigi.study.presentation;
 import com.bookchigi.auth.domain.CustomUserPrincipal;
 import com.bookchigi.book.presentation.dto.PageResponse;
 import com.bookchigi.study.application.StudyService;
+import com.bookchigi.study.domain.StudyRole;
+import com.bookchigi.study.presentation.dto.MyStudyResponse;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
 import com.bookchigi.study.presentation.dto.StudyDetailResponse;
 import com.bookchigi.study.presentation.dto.StudyResponse;
+import com.bookchigi.study.presentation.dto.StudyUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +30,36 @@ public class StudyController {
     ) {
         Long userId = principal != null ? principal.getUserId() : null;
         StudyDetailResponse response = studyService.getStudy(studyId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/studies/{studyId}")
+    public ResponseEntity<StudyDetailResponse> update(
+            @PathVariable Long studyId,
+            @Valid @RequestBody StudyUpdateRequest request,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        StudyDetailResponse response = studyService.update(studyId, request, principal.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/studies/{studyId}/join")
+    public ResponseEntity<Void> join(
+            @PathVariable Long studyId,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        studyService.join(studyId, principal.getUserId());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users/me/studies")
+    public ResponseEntity<PageResponse<MyStudyResponse>> getMyStudies(
+            @RequestParam StudyRole role,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        PageResponse<MyStudyResponse> response = studyService.getMyStudies(principal.getUserId(), role, page, size);
         return ResponseEntity.ok(response);
     }
 

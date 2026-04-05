@@ -5,6 +5,8 @@ import com.bookchigi.user.domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.bookchigi.study.domain.EnrollmentStatus;
+
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,5 +92,69 @@ class StudyTest {
 
         assertThat(member.getRole()).isEqualTo(StudyRole.MEMBER);
         assertThat(member.isLeader()).isFalse();
+    }
+
+    // ===== enrollmentStatus =====
+
+    @Test
+    @DisplayName("모집 기간이 없으면 ALWAYS")
+    void enrollmentStatusAlways() {
+        Book book = Book.builder().isbn("9791173576577").build();
+        Study study = Study.create("스터디", null, 10, null, null, true, book);
+
+        assertThat(study.getEnrollmentStatus()).isEqualTo(EnrollmentStatus.ALWAYS);
+    }
+
+    @Test
+    @DisplayName("모집 시작 전이면 UPCOMING")
+    void enrollmentStatusUpcoming() {
+        Book book = Book.builder().isbn("9791173576577").build();
+        LocalDateTime futureStart = LocalDateTime.now().plusDays(1);
+        LocalDateTime futureEnd = LocalDateTime.now().plusDays(10);
+        Study study = Study.create("스터디", null, 10, futureStart, futureEnd, true, book);
+
+        assertThat(study.getEnrollmentStatus()).isEqualTo(EnrollmentStatus.UPCOMING);
+    }
+
+    @Test
+    @DisplayName("모집 기간 내이면 OPEN")
+    void enrollmentStatusOpen() {
+        Book book = Book.builder().isbn("9791173576577").build();
+        LocalDateTime pastStart = LocalDateTime.now().minusDays(1);
+        LocalDateTime futureEnd = LocalDateTime.now().plusDays(10);
+        Study study = Study.create("스터디", null, 10, pastStart, futureEnd, true, book);
+
+        assertThat(study.getEnrollmentStatus()).isEqualTo(EnrollmentStatus.OPEN);
+    }
+
+    @Test
+    @DisplayName("모집 마감이면 CLOSED")
+    void enrollmentStatusClosed() {
+        Book book = Book.builder().isbn("9791173576577").build();
+        LocalDateTime pastStart = LocalDateTime.now().minusDays(10);
+        LocalDateTime pastEnd = LocalDateTime.now().minusDays(1);
+        Study study = Study.create("스터디", null, 10, pastStart, pastEnd, true, book);
+
+        assertThat(study.getEnrollmentStatus()).isEqualTo(EnrollmentStatus.CLOSED);
+    }
+
+    @Test
+    @DisplayName("start만 있고 아직 시작 전이면 UPCOMING")
+    void enrollmentStatusStartOnly() {
+        Book book = Book.builder().isbn("9791173576577").build();
+        LocalDateTime futureStart = LocalDateTime.now().plusDays(1);
+        Study study = Study.create("스터디", null, 10, futureStart, null, true, book);
+
+        assertThat(study.getEnrollmentStatus()).isEqualTo(EnrollmentStatus.UPCOMING);
+    }
+
+    @Test
+    @DisplayName("end만 있고 아직 마감 전이면 OPEN")
+    void enrollmentStatusEndOnly() {
+        Book book = Book.builder().isbn("9791173576577").build();
+        LocalDateTime futureEnd = LocalDateTime.now().plusDays(10);
+        Study study = Study.create("스터디", null, 10, null, futureEnd, true, book);
+
+        assertThat(study.getEnrollmentStatus()).isEqualTo(EnrollmentStatus.OPEN);
     }
 }

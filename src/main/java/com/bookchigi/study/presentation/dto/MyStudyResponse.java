@@ -1,12 +1,15 @@
 package com.bookchigi.study.presentation.dto;
 
+import com.bookchigi.book.presentation.dto.BookResponse;
 import com.bookchigi.study.domain.EnrollmentStatus;
 import com.bookchigi.study.domain.Study;
+import com.bookchigi.study.domain.StudyMember;
+import com.bookchigi.study.domain.StudyRole;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-public record StudyResponse(
+public record MyStudyResponse(
         Long id,
         String name,
         String description,
@@ -15,11 +18,14 @@ public record StudyResponse(
         LocalDateTime enrollmentEnd,
         EnrollmentStatus enrollmentStatus,
         boolean isPublic,
-        String leaderNickname,
-        Instant createdAt
+        StudyRole myRole,
+        Instant joinedAt,
+        BookResponse book
 ) {
-    public static StudyResponse from(Study study, String leaderNickname) {
-        return new StudyResponse(
+    public static MyStudyResponse from(StudyMember member) {
+        Study study = member.getStudy();
+
+        return new MyStudyResponse(
                 study.getId(),
                 study.getName(),
                 study.getDescription(),
@@ -28,8 +34,9 @@ public record StudyResponse(
                 study.getEnrollmentEnd(),
                 study.getEnrollmentStatus(),
                 study.isPublic(),
-                leaderNickname,
-                study.getCreatedAt()
+                member.getRole(),
+                member.getJoinedAt(),
+                BookResponse.from(study.getBook())
         );
     }
 }

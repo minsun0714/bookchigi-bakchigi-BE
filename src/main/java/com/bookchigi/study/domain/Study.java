@@ -67,4 +67,36 @@ public class Study {
                 .book(book)
                 .build();
     }
+
+    public void update(String name,
+                       String description,
+                       int maxMembers,
+                       LocalDateTime enrollmentStart,
+                       LocalDateTime enrollmentEnd,
+                       boolean isPublic) {
+        this.name = name;
+        this.description = description;
+        this.maxMembers = maxMembers;
+        this.enrollmentStart = enrollmentStart;
+        this.enrollmentEnd = enrollmentEnd;
+        this.isPublic = isPublic;
+    }
+
+    public EnrollmentStatus getEnrollmentStatus() {
+        if (enrollmentStart == null && enrollmentEnd == null) {
+            return EnrollmentStatus.ALWAYS;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (enrollmentStart != null && now.isBefore(enrollmentStart)) {
+            return EnrollmentStatus.UPCOMING;
+        }
+
+        if (enrollmentEnd != null && now.isAfter(enrollmentEnd)) {
+            return EnrollmentStatus.CLOSED;
+        }
+
+        return EnrollmentStatus.OPEN;
+    }
 }

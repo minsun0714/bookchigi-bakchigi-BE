@@ -1,6 +1,7 @@
 package com.bookchigi.study.presentation.dto;
 
 import com.bookchigi.book.presentation.dto.BookResponse;
+import com.bookchigi.study.domain.EnrollmentStatus;
 import com.bookchigi.study.domain.Study;
 import com.bookchigi.study.domain.StudyMember;
 
@@ -15,15 +16,24 @@ public record StudyDetailResponse(
         int maxMembers,
         LocalDateTime enrollmentStart,
         LocalDateTime enrollmentEnd,
+        EnrollmentStatus enrollmentStatus,
         boolean isPublic,
+        boolean isCurrentUserLeader,
+        boolean isCurrentUserMember,
         Instant createdAt,
         BookResponse book,
         List<StudyMemberResponse> members
 ) {
-    public static StudyDetailResponse from(Study study, List<StudyMember> members) {
+    public static StudyDetailResponse from(Study study, List<StudyMember> members, Long currentUserId) {
         List<StudyMemberResponse> memberResponses = members.stream()
                 .map(StudyMemberResponse::from)
                 .toList();
+
+        boolean isLeader = members.stream()
+                .anyMatch(m -> m.isLeader() && m.getUser().getId().equals(currentUserId));
+
+        boolean isMember = members.stream()
+                .anyMatch(m -> m.getUser().getId().equals(currentUserId));
 
         return new StudyDetailResponse(
                 study.getId(),
@@ -32,7 +42,10 @@ public record StudyDetailResponse(
                 study.getMaxMembers(),
                 study.getEnrollmentStart(),
                 study.getEnrollmentEnd(),
+                study.getEnrollmentStatus(),
                 study.isPublic(),
+                isLeader,
+                isMember,
                 study.getCreatedAt(),
                 BookResponse.from(study.getBook()),
                 memberResponses
