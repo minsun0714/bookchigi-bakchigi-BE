@@ -32,6 +32,9 @@ public class User {
     @Column(length = 50)
     private String nickname;
 
+    @Column(length = 500)
+    private String profileImage;
+
     @Column(name = "oauth_provider", nullable = false, length = 20)
     private String oauthProvider;
 
@@ -68,15 +71,21 @@ public class User {
 
     public static User createFromOAuth(String email,
                                        String name,
+                                       String profileImage,
                                        String provider) {
         return User.builder()
                 .email(email)
                 .name(name)
+                .profileImage(profileImage)
                 .oauthProvider(provider)
                 .build();
     }
 
     public void updateNickname(String newNickname) {
         this.nickname = newNickname;
+    }
+
+    public void updateProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 }

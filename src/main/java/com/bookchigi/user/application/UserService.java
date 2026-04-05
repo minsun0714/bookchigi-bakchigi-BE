@@ -24,11 +24,16 @@ public class UserService {
     public User createIfNotExists(OAuth2User oAuth2User) {
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
+        String picture = oAuth2User.getAttribute("picture");
         String OAUTH_PROVIDER = "GOOGLE";
 
         return userRepository.findActiveUserByEmailAndAuthProvider(email, "GOOGLE")
+                .map(existingUser -> {
+                    existingUser.updateProfileImage(picture);
+                    return existingUser;
+                })
                 .orElseGet(() -> {
-                    User newUser = User.createFromOAuth(email, name, OAUTH_PROVIDER);
+                    User newUser = User.createFromOAuth(email, name, picture, OAUTH_PROVIDER);
                     User savedUser = userRepository.save(newUser);
 
                     savedUser.updateNickname(savedUser.getName() + "#" + savedUser.getId());
