@@ -1,0 +1,32 @@
+package com.bookchigi.study.dto;
+
+import com.bookchigi.study.domain.Study;
+
+import java.time.Instant;
+import java.time.LocalDate;
+
+public record StudyResponse(
+        Long id,
+        String name,
+        String description,
+        int maxMembers,
+        LocalDate enrollmentStart,
+        LocalDate enrollmentEnd,
+        boolean isPublic,
+        String creatorNickname,
+        Instant createdAt
+) {
+    public static StudyResponse from(Study study) {
+        return new StudyResponse(
+                study.getId(),
+                study.getName(),
+                study.getDescription(),
+                study.getMaxMembers(),
+                study.getEnrollmentStart(),
+                study.getEnrollmentEnd(),
+                study.isPublic(),
+                study.getCreator().getNickname(),
+                study.getCreatedAt()
+        );
+    }
+}

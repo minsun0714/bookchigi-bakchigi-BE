@@ -1,0 +1,13 @@
+package com.bookchigi.study.persistence;
+
+import com.bookchigi.study.domain.Study;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface StudyRepository extends JpaRepository<Study, Long> {
+
+    Page<Study> findByBookId(Long bookId, Pageable pageable);
+
+    Page<Study> findByBookIsbn(String isbn, Pageable pageable);
+}
