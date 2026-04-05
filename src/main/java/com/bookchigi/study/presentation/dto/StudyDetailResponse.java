@@ -25,14 +25,18 @@ public record StudyDetailResponse(
         List<StudyMemberResponse> members
 ) {
     public static StudyDetailResponse from(Study study, List<StudyMember> members, Long currentUserId) {
-        List<StudyMemberResponse> memberResponses = members.stream()
+        List<StudyMember> activeMembers = members.stream()
+                .filter(m -> !m.isPending())
+                .toList();
+
+        List<StudyMemberResponse> memberResponses = activeMembers.stream()
                 .map(StudyMemberResponse::from)
                 .toList();
 
-        boolean isLeader = members.stream()
+        boolean isLeader = activeMembers.stream()
                 .anyMatch(m -> m.isLeader() && m.getUser().getId().equals(currentUserId));
 
-        boolean isMember = members.stream()
+        boolean isMember = activeMembers.stream()
                 .anyMatch(m -> m.getUser().getId().equals(currentUserId));
 
         return new StudyDetailResponse(
