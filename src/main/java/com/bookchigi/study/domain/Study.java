@@ -81,4 +81,22 @@ public class Study {
         this.enrollmentEnd = enrollmentEnd;
         this.isPublic = isPublic;
     }
+
+    public EnrollmentStatus getEnrollmentStatus() {
+        if (enrollmentStart == null && enrollmentEnd == null) {
+            return EnrollmentStatus.ALWAYS;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (enrollmentStart != null && now.isBefore(enrollmentStart)) {
+            return EnrollmentStatus.UPCOMING;
+        }
+
+        if (enrollmentEnd != null && now.isAfter(enrollmentEnd)) {
+            return EnrollmentStatus.CLOSED;
+        }
+
+        return EnrollmentStatus.OPEN;
+    }
 }

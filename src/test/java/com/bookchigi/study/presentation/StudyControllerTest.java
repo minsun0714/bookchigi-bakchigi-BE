@@ -4,6 +4,7 @@ import com.bookchigi.auth.domain.CustomUserPrincipal;
 import com.bookchigi.book.presentation.dto.PageResponse;
 import com.bookchigi.study.application.StudyService;
 import com.bookchigi.study.presentation.dto.StudyCreateRequest;
+import com.bookchigi.study.domain.EnrollmentStatus;
 import com.bookchigi.study.presentation.dto.StudyResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -66,7 +67,7 @@ class StudyControllerTest {
         StudyResponse response = new StudyResponse(
                 1L, "자바 스터디", "자바를 공부합니다", 10,
                 LocalDateTime.of(2026, 4, 10, 9, 0), LocalDateTime.of(2026, 4, 30, 18, 0),
-                true, "테스터#1", Instant.now()
+                EnrollmentStatus.OPEN, true, "테스터#1", Instant.now()
         );
 
         given(studyService.create(eq(isbn), any(StudyCreateRequest.class), eq(1L)))
@@ -106,7 +107,7 @@ class StudyControllerTest {
         StudyResponse studyResponse = new StudyResponse(
                 1L, "자바 스터디", "자바를 공부합니다", 10,
                 LocalDateTime.of(2026, 4, 10, 9, 0), LocalDateTime.of(2026, 4, 30, 18, 0),
-                true, "테스터#1", Instant.now()
+                EnrollmentStatus.OPEN, true, "테스터#1", Instant.now()
         );
         PageResponse<StudyResponse> pageResponse = new PageResponse<>(
                 List.of(studyResponse), 0, 10, 1, 1

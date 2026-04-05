@@ -1,5 +1,6 @@
 package com.bookchigi.study.presentation.dto;
 
+import com.bookchigi.study.domain.EnrollmentStatus;
 import com.bookchigi.study.domain.Study;
 
 import java.time.Instant;
@@ -12,6 +13,7 @@ public record StudyResponse(
         int maxMembers,
         LocalDateTime enrollmentStart,
         LocalDateTime enrollmentEnd,
+        EnrollmentStatus enrollmentStatus,
         boolean isPublic,
         String leaderNickname,
         Instant createdAt
@@ -24,6 +26,7 @@ public record StudyResponse(
                 study.getMaxMembers(),
                 study.getEnrollmentStart(),
                 study.getEnrollmentEnd(),
+                study.getEnrollmentStatus(),
                 study.isPublic(),
                 leaderNickname,
                 study.getCreatedAt()

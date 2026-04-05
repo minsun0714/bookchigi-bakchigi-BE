@@ -5,6 +5,7 @@ import com.bookchigi.book.domain.Book;
 import com.bookchigi.book.presentation.dto.PageResponse;
 import com.bookchigi.common.exception.BusinessException;
 import com.bookchigi.common.exception.ErrorCode;
+import com.bookchigi.study.domain.EnrollmentStatus;
 import com.bookchigi.study.domain.Study;
 import com.bookchigi.study.domain.StudyMember;
 import com.bookchigi.study.domain.StudyRole;
@@ -109,11 +110,9 @@ public class StudyService {
         Study study = studyRepository.findByIdForUpdate(studyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
 
-        if (study.getEnrollmentStart() != null && study.getEnrollmentEnd() != null) {
-            java.time.LocalDateTime now = java.time.LocalDateTime.now();
-            if (now.isBefore(study.getEnrollmentStart()) || now.isAfter(study.getEnrollmentEnd())) {
-                throw new BusinessException(ErrorCode.STUDY_ENROLLMENT_CLOSED);
-            }
+        EnrollmentStatus status = study.getEnrollmentStatus();
+        if (status == EnrollmentStatus.UPCOMING || status == EnrollmentStatus.CLOSED) {
+            throw new BusinessException(ErrorCode.STUDY_ENROLLMENT_CLOSED);
         }
 
         if (studyMemberRepository.existsByStudyIdAndUserId(studyId, userId)) {

@@ -1,6 +1,7 @@
 package com.bookchigi.study.presentation.dto;
 
 import com.bookchigi.book.presentation.dto.BookResponse;
+import com.bookchigi.study.domain.EnrollmentStatus;
 import com.bookchigi.study.domain.Study;
 import com.bookchigi.study.domain.StudyMember;
 
@@ -15,6 +16,7 @@ public record StudyDetailResponse(
         int maxMembers,
         LocalDateTime enrollmentStart,
         LocalDateTime enrollmentEnd,
+        EnrollmentStatus enrollmentStatus,
         boolean isPublic,
         boolean isCurrentUserLeader,
         boolean isCurrentUserMember,
@@ -40,6 +42,7 @@ public record StudyDetailResponse(
                 study.getMaxMembers(),
                 study.getEnrollmentStart(),
                 study.getEnrollmentEnd(),
+                study.getEnrollmentStatus(),
                 study.isPublic(),
                 isLeader,
                 isMember,
