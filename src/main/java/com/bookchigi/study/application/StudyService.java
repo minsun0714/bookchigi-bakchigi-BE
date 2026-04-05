@@ -6,9 +6,12 @@ import com.bookchigi.book.presentation.dto.PageResponse;
 import com.bookchigi.common.exception.BusinessException;
 import com.bookchigi.common.exception.ErrorCode;
 import com.bookchigi.study.domain.Study;
-import com.bookchigi.study.presentation.dto.StudyCreateRequest;
-import com.bookchigi.study.presentation.dto.StudyResponse;
+import com.bookchigi.study.domain.StudyMember;
+import com.bookchigi.study.infrastructure.StudyMemberRepository;
 import com.bookchigi.study.infrastructure.StudyRepository;
+import com.bookchigi.study.presentation.dto.StudyCreateRequest;
+import com.bookchigi.study.presentation.dto.StudyDetailResponse;
+import com.bookchigi.study.presentation.dto.StudyResponse;
 import com.bookchigi.user.domain.User;
 import com.bookchigi.user.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ import java.util.List;
 public class StudyService {
 
     private final StudyRepository studyRepository;
+    private final StudyMemberRepository studyMemberRepository;
     private final BookService bookService;
     private final UserRepository userRepository;
 
@@ -42,19 +46,47 @@ public class StudyService {
                 request.enrollmentStart(),
                 request.enrollmentEnd(),
                 request.isPublic(),
-                book,
-                creator
+                book
         );
         Study savedStudy = studyRepository.save(study);
 
-        return StudyResponse.from(savedStudy);
+        StudyMember leader = StudyMember.createLeader(savedStudy, creator);
+        studyMemberRepository.save(leader);
+
+        return StudyResponse.from(savedStudy, creator.getNickname());
+    }
+
+    public StudyDetailResponse getStudy(Long studyId, Long userId) {
+        Study study = studyRepository.findById(studyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
+
+        if (!study.isPublic()) {
+            if (userId == null) {
+                throw new BusinessException(ErrorCode.UNAUTHORIZED);
+            }
+            boolean isMember = studyMemberRepository.existsByStudyIdAndUserId(studyId, userId);
+            if (!isMember) {
+                throw new BusinessException(ErrorCode.FORBIDDEN);
+            }
+        }
+
+        String leaderNickname = studyMemberRepository.findByStudyIdAndRole(studyId, com.bookchigi.study.domain.StudyRole.LEADER)
+                .map(member -> member.getUser().getNickname())
+                .orElse(null);
+
+        return StudyDetailResponse.from(study, leaderNickname);
     }
 
     public PageResponse<StudyResponse> getStudiesByIsbn(String isbn, int page, int size) {
         Page<Study> studyPage = studyRepository.findByBookIsbnOrderByCreatedAtDesc(isbn, PageRequest.of(page, size));
 
         List<StudyResponse> content = studyPage.getContent().stream()
-                .map(StudyResponse::from)
+                .map(study -> {
+                    String leaderNickname = studyMemberRepository.findByStudyIdAndRole(study.getId(), com.bookchigi.study.domain.StudyRole.LEADER)
+                            .map(member -> member.getUser().getNickname())
+                            .orElse(null);
+                    return StudyResponse.from(study, leaderNickname);
+                })
                 .toList();
 
         return new PageResponse<>(content, page, size, studyPage.getTotalElements(), studyPage.getTotalPages());

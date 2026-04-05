@@ -13,10 +13,10 @@ public record StudyResponse(
         LocalDateTime enrollmentStart,
         LocalDateTime enrollmentEnd,
         boolean isPublic,
-        String creatorNickname,
+        String leaderNickname,
         Instant createdAt
 ) {
-    public static StudyResponse from(Study study) {
+    public static StudyResponse from(Study study, String leaderNickname) {
         return new StudyResponse(
                 study.getId(),
                 study.getName(),
@@ -25,7 +25,7 @@ public record StudyResponse(
                 study.getEnrollmentStart(),
                 study.getEnrollmentEnd(),
                 study.isPublic(),
-                study.getCreator().getNickname(),
+                leaderNickname,
                 study.getCreatedAt()
         );
     }
