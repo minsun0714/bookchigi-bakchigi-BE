@@ -17,6 +17,7 @@ public record StudyDetailResponse(
         LocalDateTime enrollmentEnd,
         boolean isPublic,
         boolean isCurrentUserLeader,
+        boolean isCurrentUserMember,
         Instant createdAt,
         BookResponse book,
         List<StudyMemberResponse> members
@@ -29,6 +30,9 @@ public record StudyDetailResponse(
         boolean isLeader = members.stream()
                 .anyMatch(m -> m.isLeader() && m.getUser().getId().equals(currentUserId));
 
+        boolean isMember = members.stream()
+                .anyMatch(m -> m.getUser().getId().equals(currentUserId));
+
         return new StudyDetailResponse(
                 study.getId(),
                 study.getName(),
@@ -38,6 +42,7 @@ public record StudyDetailResponse(
                 study.getEnrollmentEnd(),
                 study.isPublic(),
                 isLeader,
+                isMember,
                 study.getCreatedAt(),
                 BookResponse.from(study.getBook()),
                 memberResponses

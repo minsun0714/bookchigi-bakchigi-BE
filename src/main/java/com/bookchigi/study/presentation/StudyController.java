@@ -41,6 +41,15 @@ public class StudyController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/studies/{studyId}/join")
+    public ResponseEntity<Void> join(
+            @PathVariable Long studyId,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        studyService.join(studyId, principal.getUserId());
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/books/{isbn}/studies")
     public ResponseEntity<StudyResponse> create(
             @PathVariable String isbn,

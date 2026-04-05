@@ -103,6 +103,34 @@ public class StudyService {
         return StudyDetailResponse.from(study, members, userId);
     }
 
+    @Transactional
+    public void join(Long studyId, Long userId) {
+        Study study = studyRepository.findByIdForUpdate(studyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
+
+        if (study.getEnrollmentStart() != null && study.getEnrollmentEnd() != null) {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            if (now.isBefore(study.getEnrollmentStart()) || now.isAfter(study.getEnrollmentEnd())) {
+                throw new BusinessException(ErrorCode.STUDY_ENROLLMENT_CLOSED);
+            }
+        }
+
+        if (studyMemberRepository.existsByStudyIdAndUserId(studyId, userId)) {
+            throw new BusinessException(ErrorCode.STUDY_ALREADY_JOINED);
+        }
+
+        long currentCount = studyMemberRepository.countByStudyId(studyId);
+        if (currentCount >= study.getMaxMembers()) {
+            throw new BusinessException(ErrorCode.STUDY_FULL);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        StudyMember member = StudyMember.createMember(study, user);
+        studyMemberRepository.save(member);
+    }
+
     public PageResponse<StudyResponse> getStudiesByIsbn(String isbn, int page, int size) {
         Page<Study> studyPage = studyRepository.findByBookIsbnOrderByCreatedAtDesc(isbn, PageRequest.of(page, size));
 
