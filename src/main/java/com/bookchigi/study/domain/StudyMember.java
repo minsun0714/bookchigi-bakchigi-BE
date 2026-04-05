@@ -56,7 +56,26 @@ public class StudyMember {
                 .build();
     }
 
+    public static StudyMember createPending(Study study, User user) {
+        return StudyMember.builder()
+                .study(study)
+                .user(user)
+                .role(StudyRole.PENDING)
+                .build();
+    }
+
     public boolean isLeader() {
         return role == StudyRole.LEADER;
+    }
+
+    public boolean isPending() {
+        return role == StudyRole.PENDING;
+    }
+
+    public void approve() {
+        if (!isPending()) {
+            throw new IllegalStateException("PENDING 상태에서만 승인할 수 있습니다.");
+        }
+        this.role = StudyRole.MEMBER;
     }
 }
