@@ -28,4 +28,6 @@ public interface StudyMemberRepository extends JpaRepository<StudyMember, Long> 
     long countByStudyIdAndRoleNot(Long studyId, StudyRole role);
 
     Page<StudyMember> findByUserIdAndRoleOrderByJoinedAtDesc(Long userId, StudyRole role, Pageable pageable);
+
+    void deleteAllByStudyId(Long studyId);
 }

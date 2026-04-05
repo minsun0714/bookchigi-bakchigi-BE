@@ -158,6 +158,17 @@ public class StudyService {
         studyMemberRepository.delete(member);
     }
 
+    @Transactional
+    public void delete(Long studyId, Long currentUserId) {
+        studyRepository.findById(studyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
+
+        verifyLeader(studyId, currentUserId);
+
+        studyMemberRepository.deleteAllByStudyId(studyId);
+        studyRepository.deleteById(studyId);
+    }
+
     public List<StudyMemberResponse> getPendingMembers(Long studyId, Long currentUserId) {
         verifyLeader(studyId, currentUserId);
 

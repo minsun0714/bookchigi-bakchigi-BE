@@ -54,6 +54,15 @@ public class StudyController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/studies/{studyId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Long studyId,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        studyService.delete(studyId, principal.getUserId());
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/studies/{studyId}/pending-members")
     public ResponseEntity<List<StudyMemberResponse>> getPendingMembers(
             @PathVariable Long studyId,

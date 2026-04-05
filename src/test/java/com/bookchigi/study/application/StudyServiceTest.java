@@ -464,4 +464,39 @@ class StudyServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining(ErrorCode.FORBIDDEN.getMessage());
     }
+
+    // ===== delete =====
+
+    @Test
+    @DisplayName("리더가 스터디를 삭제할 수 있다")
+    void delete() {
+        Long leaderId = 1L;
+        User leader = User.builder().id(leaderId).email("leader@gmail.com").name("리더").oauthProvider("GOOGLE").build();
+
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+        StudyMember leaderMember = StudyMember.createLeader(study, leader);
+
+        given(studyRepository.findById(1L)).willReturn(Optional.of(study));
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.of(leaderMember));
+
+        studyService.delete(1L, leaderId);
+
+        verify(studyMemberRepository).deleteAllByStudyId(1L);
+        verify(studyRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("리더가 아니면 스터디를 삭제할 수 없다")
+    void deleteWithoutLeaderRole() {
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+
+        given(studyRepository.findById(1L)).willReturn(Optional.of(study));
+        given(studyMemberRepository.findByStudyIdAndRole(1L, StudyRole.LEADER)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> studyService.delete(1L, 999L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(ErrorCode.FORBIDDEN.getMessage());
+
+        verify(studyRepository, never()).deleteById(any());
+    }
 }
