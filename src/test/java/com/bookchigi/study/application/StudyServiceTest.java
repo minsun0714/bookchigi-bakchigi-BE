@@ -499,4 +499,81 @@ class StudyServiceTest {
 
         verify(studyRepository, never()).deleteById(any());
     }
+
+    // ===== leave =====
+
+    @Test
+    @DisplayName("일반 멤버가 스터디를 탈퇴할 수 있다")
+    void leave() {
+        Long userId = 2L;
+        User user = User.builder().id(userId).email("member@gmail.com").name("멤버").oauthProvider("GOOGLE").build();
+
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+        StudyMember member = StudyMember.createMember(study, user);
+
+        given(studyMemberRepository.findByStudyIdAndUserId(1L, userId)).willReturn(Optional.of(member));
+
+        studyService.leave(1L, userId, null);
+
+        verify(studyMemberRepository).delete(member);
+    }
+
+    @Test
+    @DisplayName("스터디장이 다음 리더를 지정하고 탈퇴할 수 있다")
+    void leaveAsLeaderWithNextLeader() {
+        Long leaderId = 1L;
+        Long nextLeaderId = 2L;
+        User leader = User.builder().id(leaderId).email("leader@gmail.com").name("리더").oauthProvider("GOOGLE").build();
+        User nextLeader = User.builder().id(nextLeaderId).email("next@gmail.com").name("다음리더").oauthProvider("GOOGLE").build();
+
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+        StudyMember leaderMember = StudyMember.createLeader(study, leader);
+        StudyMember nextMember = StudyMember.createMember(study, nextLeader);
+
+        given(studyMemberRepository.findByStudyIdAndUserId(1L, leaderId)).willReturn(Optional.of(leaderMember));
+        given(studyMemberRepository.countByStudyIdAndRoleNot(1L, StudyRole.PENDING)).willReturn(2L);
+        given(studyMemberRepository.findByStudyIdAndUserId(1L, nextLeaderId)).willReturn(Optional.of(nextMember));
+
+        studyService.leave(1L, leaderId, nextLeaderId);
+
+        assertThat(nextMember.getRole()).isEqualTo(StudyRole.LEADER);
+        verify(studyMemberRepository).delete(leaderMember);
+    }
+
+    @Test
+    @DisplayName("유일한 멤버인 리더가 탈퇴하면 스터디가 삭제된다")
+    void leaveAsOnlyMember() {
+        Long leaderId = 1L;
+        User leader = User.builder().id(leaderId).email("leader@gmail.com").name("리더").oauthProvider("GOOGLE").build();
+
+        Study study = Study.create("스��디", "설명", 10, null, null, true, createBook());
+        StudyMember leaderMember = StudyMember.createLeader(study, leader);
+
+        given(studyMemberRepository.findByStudyIdAndUserId(1L, leaderId)).willReturn(Optional.of(leaderMember));
+        given(studyMemberRepository.countByStudyIdAndRoleNot(1L, StudyRole.PENDING)).willReturn(1L);
+
+        studyService.leave(1L, leaderId, null);
+
+        verify(studyMemberRepository).deleteAllByStudyId(1L);
+        verify(studyRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("스터디장이 다음 리더 없이 탈퇴하면 예외가 발생한다")
+    void leaveAsLeaderWithoutNextLeader() {
+        Long leaderId = 1L;
+        User leader = User.builder().id(leaderId).email("leader@gmail.com").name("리더").oauthProvider("GOOGLE").build();
+
+        Study study = Study.create("스터디", "설명", 10, null, null, true, createBook());
+        StudyMember leaderMember = StudyMember.createLeader(study, leader);
+
+        given(studyMemberRepository.findByStudyIdAndUserId(1L, leaderId)).willReturn(Optional.of(leaderMember));
+        given(studyMemberRepository.countByStudyIdAndRoleNot(1L, StudyRole.PENDING)).willReturn(3L);
+
+        assertThatThrownBy(() -> studyService.leave(1L, leaderId, null))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(ErrorCode.NEXT_LEADER_REQUIRED.getMessage());
+
+        verify(studyMemberRepository, never()).delete(any());
+    }
 }

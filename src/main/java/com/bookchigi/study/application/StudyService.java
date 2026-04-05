@@ -159,6 +159,33 @@ public class StudyService {
     }
 
     @Transactional
+    public void leave(Long studyId, Long userId, Long nextLeaderId) {
+        StudyMember member = studyMemberRepository.findByStudyIdAndUserId(studyId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
+
+        if (member.isLeader()) {
+            long activeCount = studyMemberRepository.countByStudyIdAndRoleNot(studyId, StudyRole.PENDING);
+
+            if (activeCount <= 1) {
+                studyMemberRepository.deleteAllByStudyId(studyId);
+                studyRepository.deleteById(studyId);
+                return;
+            }
+
+            if (nextLeaderId == null) {
+                throw new BusinessException(ErrorCode.NEXT_LEADER_REQUIRED);
+            }
+
+            StudyMember nextLeader = studyMemberRepository.findByStudyIdAndUserId(studyId, nextLeaderId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+            nextLeader.promoteToLeader();
+        }
+
+        studyMemberRepository.delete(member);
+    }
+
+    @Transactional
     public void delete(Long studyId, Long currentUserId) {
         studyRepository.findById(studyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_NOT_FOUND));
