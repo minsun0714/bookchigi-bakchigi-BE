@@ -65,7 +65,7 @@ class StudyServiceTest {
     }
 
     private User createUser() {
-        return User.createFromOAuth("test@gmail.com", "테스터", "GOOGLE");
+        return User.createFromOAuth("test@gmail.com", "테스터", null, "GOOGLE");
     }
 
     // ===== create =====
