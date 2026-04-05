@@ -1,7 +1,6 @@
 package com.bookchigi.study.domain;
 
 import com.bookchigi.book.domain.Book;
-import com.bookchigi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -43,10 +42,6 @@ public class Study {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id", nullable = false)
-    private User creator;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -61,8 +56,7 @@ public class Study {
                                 LocalDateTime enrollmentStart,
                                 LocalDateTime enrollmentEnd,
                                 boolean isPublic,
-                                Book book,
-                                User creator) {
+                                Book book) {
         return Study.builder()
                 .name(name)
                 .description(description)
@@ -71,7 +65,6 @@ public class Study {
                 .enrollmentEnd(enrollmentEnd)
                 .isPublic(isPublic)
                 .book(book)
-                .creator(creator)
                 .build();
     }
 }
